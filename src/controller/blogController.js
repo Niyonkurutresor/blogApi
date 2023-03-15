@@ -1,3 +1,4 @@
+const path = require('path')
 const blog = require('../model/blogModel')
 
 //find all blogs
@@ -25,8 +26,8 @@ const deletAll = async(req,res)=>{
 //find specific blog
 const singleBlog = async(req,res)=>{
     try {
-        const singleBlog = await blog.findOne({_id:req.params.id})
-        res.status(200).json({message:'blog is found successfuly',result:singleBlog})
+        const singleBlog = await blog.findOne({_id:req.params.id}).populate({ path: 'outhor', select: '-_id username age email' }).populate({ path: 'comment', select: '-_id commentaName content' })
+        res.status(200).json({message:'blog is found successfuly',result:singleBlog}).popul
     } 
     catch (error) {
         res.status(404).json({message:'no such blog',error:error})
@@ -35,10 +36,10 @@ const singleBlog = async(req,res)=>{
 
 //create blog
 const createBlog = async(req,res)=>{
-   const {title,content} = req.body
+   const {title,content,outhor} = req.body
     try {
-        const newBlog = blog.create({title, content, publishDate: Date.now()})
-        res.status(201).json({message:'user is created'})
+        const newBlog = (await blog.create({title, content,outhor}))
+        res.status(201).json({message:'user is created',user:newBlog})
     } 
     catch (error) {
         res.json(error)
